@@ -4,20 +4,22 @@
   "description": "Skincare Routine & Inventory Tracker - frontend (Vue.js 3)",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=22.13.0"
-  },
-  "workspaces": [
-    "frontend"
-  ],
+  "engines": { "node": ">=22.13.0" },
   "scripts": {
-    "dev": "npm run dev --workspace frontend",
-    "build": "npm run build --workspace frontend",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
+  "dependencies": {
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
     "@vitest/coverage-v8": "^5.0.5",
+    "vite": "^7.0.0",
     "vitest": "^5.0.5"
   }
 }
