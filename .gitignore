@@ -8,3 +8,6 @@ backend/data/
 .trivy-cache/
 trivy-results.sarif
 latest-app.zip
+
+.vercel
+.env*
