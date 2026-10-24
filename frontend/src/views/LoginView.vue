@@ -30,7 +30,7 @@ async function submit() {
   formError.value = '';
   if (!validate()) {
     await nextTick();
-    document.getElementById(fieldErrors.email ? 'email' : 'password')?.focus();
+    document.getElementById(fieldErrors.email ? 'username' : 'password')?.focus();
     return;
   }
 
@@ -72,9 +72,9 @@ async function submit() {
         <div v-if="formError" class="error-box" role="alert">{{ formError }}</div>
 
         <div class="field">
-          <label for="email">Email</label>
+          <label for="username">Email</label>
           <input
-            id="email"
+            id="username"
             v-model="form.email"
             class="input"
             type="email"
@@ -110,7 +110,7 @@ async function submit() {
           <label for="show-password">Tampilkan kata sandi</label>
         </div>
 
-        <button type="submit" class="btn btn--primary" :disabled="submitting">
+        <button id="btn-submit" type="submit" class="btn btn--primary" :disabled="submitting">
           {{ submitting ? 'Memproses…' : 'Masuk' }}
         </button>
       </form>
