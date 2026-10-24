@@ -1,0 +1,10 @@
+node_modules/
+coverage/
+backend/data/
+*.db
+*.db-shm
+*.db-wal
+.env
+.trivy-cache/
+trivy-results.sarif
+latest-app.zip
