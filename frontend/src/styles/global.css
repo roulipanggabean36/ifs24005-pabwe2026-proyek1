@@ -108,7 +108,8 @@ p {
   border-radius: var(--radius);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  /* background-color sengaja tidak ikut transisi agar kontras teks tetap valid saat tombol berpindah dari nonaktif ke aktif */
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .btn svg {
   width: 1.05em;
