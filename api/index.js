@@ -1,0 +1,12 @@
+// Titik masuk Vercel: seluruh permintaan /api/* diteruskan ke aplikasi Express yang sama dengan server lokal.
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createApp } from '../backend/src/app.js';
+import { openDatabase } from '../backend/src/db/database.js';
+
+// Vercel hanya mengizinkan menulis di folder sementara, jadi database SQLite ditaruh di sana.
+// Isinya hilang saat fungsi dimulai ulang dan terisi dummy data lagi (SEED=false untuk menonaktifkan).
+const dbPath = process.env.DB_PATH || join(tmpdir(), 'skincare.db');
+const db = openDatabase(dbPath, { seed: process.env.SEED !== 'false' });
+
+export default createApp(db);
