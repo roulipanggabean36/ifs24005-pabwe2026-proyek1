@@ -25,19 +25,35 @@ const MONTHS = [
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
 ];
 
+const isDigits = (text) => text !== '' && [...text].every((c) => c >= '0' && c <= '9');
+
 // '2026-10-22' -> '22 Oktober 2026'
 export function formatDate(iso) {
-  if (typeof iso !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '-';
-  const [year, month, day] = iso.split('-').map(Number);
-  if (!MONTHS[month - 1]) return '-';
-  return `${day} ${MONTHS[month - 1]} ${year}`;
+  if (typeof iso !== 'string') return '-';
+  const parts = iso.split('-');
+  const [year, month, day] = parts;
+  const validShape =
+    parts.length === 3 &&
+    year.length === 4 &&
+    month.length === 2 &&
+    day.length === 2 &&
+    parts.every(isDigits);
+  if (!validShape || !MONTHS[Number(month) - 1]) return '-';
+  return `${Number(day)} ${MONTHS[Number(month) - 1]} ${Number(year)}`;
 }
 
 // 25000 -> 'Rp 25.000'
 export function formatRupiah(value) {
   if (value === null || value === undefined || value === '') return '-';
-  const digits = String(Math.trunc(Number(value)));
-  return `Rp ${digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+  const text = String(Math.trunc(Number(value)));
+  const negative = text.startsWith('-');
+  const digits = negative ? text.slice(1) : text;
+  if (!isDigits(digits)) return `Rp ${text}`;
+  const groups = [];
+  for (let end = digits.length; end > 0; end -= 3) {
+    groups.unshift(digits.slice(Math.max(0, end - 3), end));
+  }
+  return `Rp ${negative ? '-' : ''}${groups.join('.')}`;
 }
 
 // Status kedaluwarsa dari jumlah hari tersisa (days_left dari API)
