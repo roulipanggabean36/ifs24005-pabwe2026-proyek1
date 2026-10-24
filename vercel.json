@@ -3,18 +3,20 @@
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
   "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index.js" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/index.js"
+      "source": "/((?!assets/).*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ],
   "functions": {
-    "api/index.js": {
-      "includeFiles": "backend/src/db/*.sql"
-    }
+    "api/index.js": { "includeFiles": "backend/src/db/*.sql" }
   }
 }
