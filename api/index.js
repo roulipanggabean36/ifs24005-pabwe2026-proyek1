@@ -9,4 +9,5 @@ import { openDatabase } from '../backend/src/db/database.js';
 const dbPath = process.env.DB_PATH || join(tmpdir(), 'skincare.db');
 const db = openDatabase(dbPath, { seed: process.env.SEED !== 'false' });
 
-export default createApp(db);
+// AUTH_SECRET wajib diisi di Vercel agar cookie login valid di semua instance fungsi.
+export default createApp(db, { authSecret: process.env.AUTH_SECRET || undefined });

@@ -222,3 +222,13 @@ textarea.input {
     scroll-behavior: auto !important;
   }
 }
+
+/* ===== Login & routing: kerangka isi halaman dan tautan bergaya tombol ===== */
+.page {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem 0 3rem;
+}
+a.btn {
+  text-decoration: none;
+}

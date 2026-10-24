@@ -1,5 +1,11 @@
 const BASE = import.meta.env?.VITE_API_BASE_URL || '/api';
 
+// Dipanggil saat API membalas 401 untuk endpoint data (sesi habis), diatur di main.js
+let onUnauthorized = null;
+export function setUnauthorizedHandler(handler) {
+  onUnauthorized = handler;
+}
+
 async function request(path, { method = 'GET', body } = {}) {
   const response = await fetch(`${BASE}${path}`, {
     method,
@@ -18,6 +24,7 @@ async function request(path, { method = 'GET', body } = {}) {
     const error = new Error(payload?.message || `Permintaan gagal (${response.status})`);
     error.status = response.status;
     error.details = payload?.errors || [];
+    if (response.status === 401 && !path.startsWith('/auth/') && onUnauthorized) onUnauthorized();
     throw error;
   }
   return payload.data;
@@ -30,6 +37,10 @@ function query(params = {}) {
 }
 
 export const api = {
+  login: (body) => request('/auth/login', { method: 'POST', body }),
+  logout: () => request('/auth/logout', { method: 'POST' }),
+  me: () => request('/auth/me'),
+
   listProducts: (params) => request(`/products${query(params)}`),
   createProduct: (body) => request('/products', { method: 'POST', body }),
   updateProduct: (id, body) => request(`/products/${id}`, { method: 'PUT', body }),

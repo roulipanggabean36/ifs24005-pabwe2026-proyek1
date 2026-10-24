@@ -165,3 +165,17 @@ Mengikuti panduan "Submit CI/CD - Jenkins & SonarQube":
 6. Tunjukkan navigasi keyboard (Tab) dan tampilan di layar kecil
 7. Tunjukkan `npm run test:coverage`
 8. Tunjukkan URL deployment online dan pipeline Jenkins/SonarQube yang hijau
+
+## Login (email dan kata sandi)
+
+Aplikasi sekarang memakai login. Halaman publik: `/` dan `/auth/login`. Halaman yang butuh login: `/produk`, `/jurnal`, `/ringkasan`, `/profil`.
+
+Akun uji dibuat otomatis saat tabel `users` masih kosong (hanya jika `SEED` tidak `false`):
+
+| Email | Kata sandi |
+|---|---|
+| `admin@skincare.test` | `Admin123!` |
+
+Endpoint: `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`. Endpoint `/api/products` dan `/api/routines` membalas 401 jika belum login. Variabel `.env` tambahan: `AUTH_SECRET`, `SEED_USER_EMAIL`, `SEED_USER_PASSWORD`, `COOKIE_SECURE` (lihat `backend/.env.example`).
+
+**Vercel:** isi `AUTH_SECRET` (string acak panjang) di Project Settings, Environment Variables, lalu redeploy. Tanpa itu, login bisa gagal karena tiap instance fungsi membuat kunci acak sendiri.
