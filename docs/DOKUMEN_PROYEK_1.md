@@ -1,10 +1,10 @@
 # Dokumen Proyek 1: Skincare Routine & Inventory Tracker
 
-**Mata kuliah:** Pengembangan Aplikasi Berbasis Web (PABWE)
-**Nama / NIM:** _(isi)_
-**Repository GitHub:** _(isi URL)_
-**URL aplikasi online:** _(isi URL dari Delcom)_
-**Video demo YouTube:** _(isi URL)_
+- **Mata kuliah:** Pengembangan Aplikasi Berbasis Web (PABWE)
+- **Nama / NIM:** Rouli Claudia Panggabean / 11S24005
+- **Repository front-end:** https://github.com/roulipanggabean36/ifs24005-pabwe2026-proyek1
+- **Repository back-end:** https://github.com/roulipanggabean36/ifs24005-pabwe2026-proyek1-backend
+- **URL aplikasi online:** https://ifs24005-pabwe2026-proyek1.s1if.cloud/
 
 ---
 
@@ -29,13 +29,14 @@ Catatan manual di buku atau galeri ponsel mudah hilang dan tidak memberi peringa
 | Pencarian dan filter | Cari nama/merek, saring kategori, tampilkan hanya yang segera kedaluwarsa |
 | Jurnal kulit | Catat produk yang dipakai, waktu (pagi/malam), kondisi kulit, nilai 1-5, dan catatan |
 | Ringkasan | Total produk, segera kedaluwarsa, sudah kedaluwarsa, jumlah catatan jurnal |
+| Autentikasi | Login dengan email dan kata sandi; halaman Produk, Jurnal, Ringkasan, dan Profil hanya bisa dibuka setelah login. Sesi disimpan back-end dalam cookie `httpOnly` (berlaku 7 hari), dan kata sandi disimpan sebagai hash scrypt |
 
 ### 2.3 Teknologi
 | Lapisan | Teknologi |
 |---|---|
-| Back-end | Express.js (REST API), folder `backend/` |
+| Back-end | Express.js (REST API), repository terpisah `ifs24005-pabwe2026-proyek1-backend` |
 | Database | SQLite (modul bawaan runtime) |
-| Front-end | Vue.js 3 (Composition API), Vite, Scoped CSS, folder `frontend/` |
+| Front-end | Vue.js 3 (Composition API), Vue Router, Vite, Scoped CSS, repository ini |
 | Pengujian | Vitest + coverage v8 |
 | CI/CD | GitHub, Jenkins, SonarQube, Trivy, Delcom |
 
@@ -45,17 +46,26 @@ Catatan manual di buku atau galeri ponsel mudah hilang dan tidak memberi peringa
 flowchart LR
   A[Browser: Vue SPA] -->|HTTP /api| B[Express.js REST API]
   B --> C[(SQLite)]
-  B -->|menyajikan frontend/dist/| A
+  G[git push ke GitHub] --> J[Jenkins: test, scan, package]
+  J --> D[Delcom: ifs24005-pabwe2026-proyek1.s1if.cloud]
+  D -->|menyajikan front-end| A
 ```
 
-Proyek terdiri dari dua folder terpisah: `backend/` (Express.js + SQLite) dan `frontend/` (Vue.js). Pada produksi, Express menyajikan hasil build Vue (`frontend/dist/`) dan API dari satu server. Pada pengembangan, Vite menjalankan front-end dan meneruskan `/api` ke Express.
+Proyek dibagi menjadi dua repository: front-end (Vue.js, repository ini) dan back-end (Express.js + SQLite). Browser memanggil API melalui path `/api`; pada pengembangan, Vite meneruskan permintaan itu ke `http://localhost:3000`. Front-end dibuild dengan Vite dan dideploy ke Delcom lewat pipeline Jenkins setiap kali ada `git push`.
 
 ## 3. Skema Database
 
-Relasi **one-to-many**: satu produk memiliki banyak catatan jurnal.
+Relasi **one-to-many**: satu produk memiliki banyak catatan jurnal. Tabel `users` menyimpan akun untuk login dan tidak berelasi dengan tabel lain: data produk dan jurnal dipakai bersama oleh semua pengguna yang sudah login.
 
 ```mermaid
 erDiagram
+  users {
+    INTEGER id PK
+    TEXT name
+    TEXT email
+    TEXT password_hash
+    TEXT created_at
+  }
   products ||--o{ routines : "dipakai di"
   products {
     INTEGER id PK
@@ -81,6 +91,15 @@ erDiagram
     TEXT created_at
   }
 ```
+
+### Tabel `users`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| id | INTEGER PK | Auto increment |
+| name | TEXT | Nama pengguna, wajib |
+| email | TEXT | Email untuk login, wajib dan unik |
+| password_hash | TEXT | Hash kata sandi (scrypt dengan salt acak), wajib |
+| created_at | TEXT | Timestamp otomatis |
 
 ### Tabel `products`
 | Kolom | Tipe | Keterangan |
@@ -108,7 +127,7 @@ erDiagram
 | notes | TEXT | Jurnal bebas |
 | created_at | TEXT | Timestamp otomatis |
 
-Skrip lengkap ada di `backend/src/db/schema.sql`, dan dummy data (termasuk Wardah Facial Wash, Implora Sunscreen SPF 40++, dan Glowies Dreamy Moisturizer) ada di `backend/src/db/seed.sql`.
+Skrip tabel (`schema.sql`) dan dummy data (`seed.sql`, termasuk Wardah Facial Wash, Implora Sunscreen SPF 40++, dan Glowies Dreamy Moisturizer) ada di folder `src/db` pada repository back-end.
 
 ## 4. Endpoint API
 
@@ -116,6 +135,9 @@ Base URL `/api`. Format sukses `{ "success": true, "data": ... }`, format gagal 
 
 | Method | Endpoint | Fungsi | Status sukses |
 |---|---|---|---|
+| POST | /api/auth/login | Login dengan `email` dan `password`; back-end membuat cookie sesi `httpOnly` dan mengembalikan data pengguna; `401` jika email atau kata sandi salah, `429` setelah 5 kali gagal dalam 15 menit | 200 |
+| POST | /api/auth/logout | Mengakhiri sesi | 200 |
+| GET | /api/auth/me | Data pengguna yang sedang login, atau `user: null` jika belum login (dipakai untuk memeriksa sesi) | 200 |
 | GET | /api/health | Cek status server | 200 |
 | GET | /api/products | Daftar produk; query `category`, `search`, `expiring` | 200 |
 | GET | /api/products/:id | Detail produk | 200 |
@@ -129,7 +151,15 @@ Base URL `/api`. Format sukses `{ "success": true, "data": ... }`, format gagal 
 | PUT | /api/routines/:id | Ubah jurnal | 200 |
 | DELETE | /api/routines/:id | Hapus jurnal | 200 |
 
-Kode error: `400` validasi gagal, `404` data tidak ditemukan, `500` kesalahan server.
+Endpoint produk dan jurnal memerlukan sesi login. Kode error: `400` validasi gagal, `401` belum login atau sesi habis (front-end lalu mengarahkan pengguna ke halaman login), `404` data tidak ditemukan, `429` terlalu banyak percobaan login, `500` kesalahan server.
+
+**Contoh `POST /api/auth/login`**
+```json
+{
+  "email": "admin@skincare.test",
+  "password": "Admin123!"
+}
+```
 
 **Contoh `POST /api/products`**
 ```json
@@ -160,7 +190,7 @@ Kode error: `400` validasi gagal, `404` data tidak ditemukan, `500` kesalahan se
 ## 5. Desain UI/UX dan Aksesibilitas
 
 ### 5.1 Tema
-Estetika **Coquette / Soft Girl**: palet pastel soft pink, peach, dan lilac; sudut membulat `border-radius: 15px`; border putus-putus (dotted) dan ornamen ✿ 🎀; font **Playfair Display** untuk judul dan **Poppins** untuk isi. Seluruh gaya ditulis dengan CSS murni (Scoped CSS per komponen) dan variabel CSS di `frontend/src/styles/global.css`.
+Estetika **Coquette / Soft Girl**: palet pastel soft pink, peach, dan lilac; sudut membulat `border-radius: 15px`; border putus-putus (dotted) dan ornamen ✿ 🎀; font **Playfair Display** untuk judul dan **Poppins** untuk isi. Seluruh gaya ditulis dengan CSS murni (Scoped CSS per komponen) dan variabel CSS di `src/styles/global.css`.
 
 ### 5.2 Kontras warna (WCAG 2.0 AA)
 Teks memakai warna gelap (dark plum) di atas latar pastel. Batas AA adalah 4,5:1 untuk teks normal. Semua pasangan di bawah dihitung dengan rumus luminans relatif WCAG.
@@ -191,10 +221,10 @@ Teks memakai warna gelap (dark plum) di atas latar pastel. Batas AA adalah 4,5:1
 
 ## 6. Pengujian dan CI/CD
 
-- **Pengujian:** Vitest (dijalankan dari root untuk backend dan frontend) menguji validasi, lapisan database, seluruh endpoint REST (termasuk cascade delete dan penanganan error), penyajian file statis, klien API, dan fungsi format di front-end. Laporan coverage (`coverage/lcov.info`) dibaca SonarQube.
+- **Pengujian (repository ini):** Vitest dengan coverage v8 menguji klien API (`src/api.js`), state login dan route guard (`src/auth.js`, `src/router.js`), pengelolaan data bersama (`src/collection.js`), dan fungsi format tanggal, rupiah, serta status kedaluwarsa (`src/utils/format.js`). File test ada di folder `tests/`. Laporan coverage (`coverage/lcov.info`) dibaca SonarQube. Pengujian validasi, lapisan database, dan endpoint REST ada di repository back-end.
 - **Pipeline Jenkins:** Checkout, Install Dependencies, Test (coverage), Trivy Security Scan, SonarQube Analysis, Quality Gate, Package Application, Publish Application, Deploy Application ke Delcom.
 - **Pemicu:** webhook GitHub, sehingga setiap `git push` menjalankan pipeline.
 
 ## 7. Penutup
 
-Aplikasi memenuhi kebutuhan pencatatan inventaris skincare dan jurnal kulit dengan tampilan feminin yang tetap memenuhi standar kontras WCAG 2.0 AA. Pengembangan lanjutan yang mungkin: notifikasi kedaluwarsa, grafik tren kondisi kulit, dan autentikasi pengguna.
+Aplikasi memenuhi kebutuhan pencatatan inventaris skincare dan jurnal kulit dengan tampilan feminin yang tetap memenuhi standar kontras WCAG 2.0 AA. Pengembangan lanjutan yang mungkin: notifikasi kedaluwarsa dan grafik tren kondisi kulit.
