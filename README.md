@@ -17,6 +17,7 @@ Tema: Coquette / Soft Girl (pastel, `border-radius: 15px`, Playfair Display + Po
 - Badge kedaluwarsa otomatis: Masih aman, X hari lagi, Sudah kedaluwarsa
 - Pencarian, saring kategori, dan saring produk yang segera kedaluwarsa
 - Jurnal kondisi kulit harian
+- Ringkasan: total produk, segera kedaluwarsa, sudah kedaluwarsa, dan jumlah catatan jurnal
 - Login dengan email dan kata sandi (cookie httpOnly dibuat oleh back-end)
 
 ## Prasyarat
@@ -42,25 +43,40 @@ API berjalan di http://localhost:3000. Lalu, di terminal lain, jalankan front-en
 
 Buka http://localhost:5173. Permintaan `/api` diteruskan otomatis ke http://localhost:3000 oleh Vite.
 
+Akun uji: `admin@skincare.test` dengan kata sandi `Admin123!`.
+
 ## Pengujian
 
     npm test                # menjalankan test front-end
     npm run test:coverage   # test + coverage (coverage/lcov.info untuk SonarQube)
 
-## Deployment online
-
-- Front-end di Vercel. File `vercel.json` meneruskan semua permintaan `/api/*` ke back-end di `https://ifs24005-pabwe2026-proyek1-backend.vercel.app`, sehingga browser hanya melihat satu domain dan cookie login berfungsi.
-- Back-end di Vercel dengan environment variable `AUTH_SECRET`, `SEED_USER_EMAIL`, dan `SEED_USER_PASSWORD`.
-- Catatan: database SQLite di Vercel disimpan di folder sementara, jadi data demo bersifat sementara dan bisa kembali ke data awal.
-
-Akun uji: `admin@skincare.test` dengan kata sandi `Admin123!`.
-
 ## CI/CD
 
-Folder `frontend/dist/` sengaja ikut di-commit. Setiap `git push` memicu pipeline Jenkins: install, test + coverage, Trivy, SonarQube, Quality Gate, package, deploy.
+Setiap `git push` ke GitHub memicu pipeline Jenkins (`Jenkinsfile` di root) dengan tahap berikut:
+
+1. Checkout
+2. Install Dependencies
+3. Test (Vitest + coverage)
+4. Trivy Security Scan
+5. SonarQube Analysis
+6. Quality Gate
+7. Package Application (`latest-app.zip`)
+8. Publish Application
+9. Deploy Application (permintaan redeploy ke Delcom dan pemantauan statusnya)
+
+Konfigurasi SonarQube ada di `sonar-project.properties`.
+
+## Deployment
+
+- Front-end dideploy lewat pipeline Jenkins ke Delcom.
+- Catatan: database SQLite pada back-end di Vercel disimpan di folder sementara, jadi data demo bersifat sementara dan bisa kembali ke data awal.
 
 ## Struktur proyek
 
-    frontend/   index.html, vite.config.js, src/, tests/, dist/ (hasil build)
+    src/        kode Vue: components/, views/, styles/, utils/, api.js, auth.js,
+                collection.js, router.js, main.js, App.vue
+    tests/      test Vitest (api-client, client-auth, format, format-edge)
+    public/     aset statis (robots.txt)
     docs/       DOKUMEN_PROYEK_1.md
-    package.json, vitest.config.js, vercel.json, Jenkinsfile, sonar-project.properties
+    index.html, vite.config.js, vitest.config.js, vercel.json,
+    Jenkinsfile, sonar-project.properties, package.json
