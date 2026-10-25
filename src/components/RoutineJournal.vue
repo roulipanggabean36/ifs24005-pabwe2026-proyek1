@@ -30,7 +30,7 @@ const groups = computed(() => {
     </div>
     <p v-if="!products.length" class="hint">Tambahkan produk dulu agar bisa menulis jurnal pemakaian.</p>
 
-    <p v-if="loading" class="empty" role="status">Sedang memuat jurnal…</p>
+    <output v-if="loading" class="empty">Sedang memuat jurnal…</output>
     <p v-else-if="!routines.length" class="empty">Belum ada catatan. Tulis kondisi kulitmu hari ini ✿</p>
 
     <div v-else class="days">

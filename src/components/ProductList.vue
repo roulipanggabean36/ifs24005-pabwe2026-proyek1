@@ -49,7 +49,7 @@ const filtered = computed(() => {
       </label>
     </form>
 
-    <p v-if="loading" class="empty" role="status">Sedang memuat produk…</p>
+    <output v-if="loading" class="empty">Sedang memuat produk…</output>
     <p v-else-if="!products.length" class="empty">
       Belum ada produk. Klik “Tambah produk” untuk mulai mencatat koleksimu ✿
     </p>

@@ -17,12 +17,11 @@ export function safeRedirect(value, fallback = '/produk') {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : fallback;
 }
 
-// Mengembalikan true (lanjut) atau lokasi tujuan pengganti
+// Menentukan apakah tujuan boleh dibuka. Selalu mengembalikan objek { allowed, redirect }
 export function authGuard(to, state = auth) {
-  if (to.meta?.requiresAuth && !state.user) {
-    return { name: 'login', query: { redirect: to.fullPath } };
-  }
-  return true;
+  const blocked = Boolean(to.meta?.requiresAuth) && !state.user;
+  const redirect = blocked ? { name: 'login', query: { redirect: to.fullPath } } : null;
+  return { allowed: !blocked, redirect };
 }
 
 export function createAppRouter(history = createWebHistory()) {
@@ -30,12 +29,13 @@ export function createAppRouter(history = createWebHistory()) {
 
   router.beforeEach(async (to) => {
     await initAuth();
-    return authGuard(to);
+    const { allowed, redirect } = authGuard(to);
+    return allowed || redirect;
   });
 
   router.afterEach((to, from) => {
     if (typeof document === 'undefined') return;
-    document.title = `${to.meta.title} · Skincare Tracker`;
+    document.title = `${typeof to.meta.title === 'string' ? to.meta.title : ''} · Skincare Tracker`;
     // Pindahkan fokus ke konten utama agar pembaca layar tahu halaman sudah berganti
     if (from !== START_LOCATION) nextTick(() => document.getElementById('konten')?.focus());
   });

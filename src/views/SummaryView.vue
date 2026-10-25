@@ -26,7 +26,7 @@ const urgent = computed(() =>
 
     <section aria-labelledby="urgent-heading">
       <h2 id="urgent-heading">Perlu segera dipakai</h2>
-      <p v-if="collection.loading" class="empty" role="status">Memuat data…</p>
+      <output v-if="collection.loading" class="empty">Memuat data…</output>
       <p v-else-if="!urgent.length" class="empty">Tidak ada produk yang mendekati kedaluwarsa. ✿</p>
       <ul v-else class="list">
         <li v-for="product in urgent" :key="product.id" class="item">

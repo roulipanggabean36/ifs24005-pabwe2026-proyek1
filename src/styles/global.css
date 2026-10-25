@@ -233,3 +233,8 @@ textarea.input {
 a.btn {
   text-decoration: none;
 }
+
+/* <output> dipakai untuk status pemuatan agar aksesibel; tampil seperti blok */
+output.empty {
+  display: block;
+}

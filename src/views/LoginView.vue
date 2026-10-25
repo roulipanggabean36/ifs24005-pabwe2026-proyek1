@@ -97,7 +97,7 @@ async function submit() {
             class="input"
             :type="showPassword ? 'text' : 'password'"
             name="password"
-            autocomplete="current-password"
+            :autocomplete="showPassword ? 'off' : 'current-password'"
             required
             :aria-invalid="fieldErrors.password ? 'true' : undefined"
             :aria-describedby="fieldErrors.password ? 'password-error' : undefined"
