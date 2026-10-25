@@ -148,10 +148,10 @@ describe('collection', () => {
 describe('router', () => {
   it('guard mengarahkan tamu ke login dengan tujuan semula, pengguna masuk lolos', () => {
     const to = { meta: { requiresAuth: true }, fullPath: '/produk?q=wardah' };
-    expect(authGuard(to, { user: null })).toEqual({ name: 'login', query: { redirect: '/produk?q=wardah' } });
-    expect(authGuard(to, { user })).toBe(true);
-    expect(authGuard({ meta: {}, fullPath: '/' }, { user: null })).toBe(true);
-    expect(authGuard({ fullPath: '/' }, { user: null })).toBe(true);
+    expect(authGuard(to, { user: null })).toEqual({ allowed: false, redirect: { name: 'login', query: { redirect: '/produk?q=wardah' } } });
+    expect(authGuard(to, { user }).allowed).toBe(true);
+    expect(authGuard({ meta: {}, fullPath: '/' }, { user: null }).allowed).toBe(true);
+    expect(authGuard({ fullPath: '/' }, { user: null }).allowed).toBe(true);
   });
 
   it('safeRedirect hanya menerima path internal', () => {

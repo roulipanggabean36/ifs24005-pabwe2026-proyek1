@@ -28,7 +28,7 @@ async function onSaved() {
 }
 
 async function remove(product) {
-  if (!window.confirm(`Hapus "${product.name}"? Semua catatan jurnal produk ini juga akan terhapus.`)) return;
+  if (!globalThis.confirm(`Hapus "${product.name}"? Semua catatan jurnal produk ini juga akan terhapus.`)) return;
   try {
     await api.deleteProduct(product.id);
     await loadAll();

@@ -28,7 +28,7 @@ async function onSaved() {
 }
 
 async function remove(entry) {
-  if (!window.confirm('Hapus catatan jurnal ini?')) return;
+  if (!globalThis.confirm('Hapus catatan jurnal ini?')) return;
   try {
     await api.deleteRoutine(entry.id);
     await loadAll();
