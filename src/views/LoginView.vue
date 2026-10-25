@@ -92,23 +92,10 @@ async function submit() {
         <div class="field">
           <label for="password">Kata sandi</label>
           <input
-            v-if="showPassword"
             id="password"
             v-model="form.password"
             class="input"
-            type="text"
-            name="password"
-            autocomplete="off"
-            required
-            :aria-invalid="fieldErrors.password ? 'true' : undefined"
-            :aria-describedby="fieldErrors.password ? 'password-error' : undefined"
-          />
-          <input
-            v-else
-            id="password"
-            v-model="form.password"
-            class="input"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             name="password"
             autocomplete="current-password"
             required
